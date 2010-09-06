@@ -12,6 +12,7 @@ var SillyHtmlGame = {
     gapWidth : 1,
     timersSet : false,
     paused : true,
+    message : 'Click to start',
     init : function(canvasId)
     {
         this.canvas = document.getElementById(canvasId);
@@ -22,7 +23,6 @@ var SillyHtmlGame = {
         }
         else
         {
-            alert('Canvas not supported!');
             return;
         }
         
@@ -30,12 +30,12 @@ var SillyHtmlGame = {
         this.lives = 5;
 
         this.canvas.onmousemove = function(event) { SillyHtmlGame.mousePosition.x = event.clientX - SillyHtmlGame.offsetPosition.x + document.documentElement.scrollLeft; SillyHtmlGame.mousePosition.y = event.clientY - SillyHtmlGame.offsetPosition.y + document.documentElement.scrollTop; }
-        this.canvas.onmouseup = function(event) { SillyHtmlGame.paused = !SillyHtmlGame.paused; }
+        this.canvas.onmouseup = function(event) { SillyHtmlGame.paused = !SillyHtmlGame.paused; SillyHtmlGame.message = 'Click to continue'; }
         
         if (!this.timersSet)
         {
             setInterval(function() { SillyHtmlGame.update(); }, 40);
-            setInterval(function() { SillyHtmlGame.fire(); }, 4000);
+            setInterval(function() { SillyHtmlGame.fire(); }, 8000);
             this.timersSet = true;
         }
     },
@@ -88,6 +88,14 @@ var SillyHtmlGame = {
                     continue;
                 }
             }
+            
+            if (this.lives <= 0)
+            {
+                this.balls.splice(0, this.balls.length);
+                this.init(this.canvas.id); // Hacky - need an init without canvas ID
+                this.paused = true;
+                this.message = 'You dead, foo\'!\nClick to try again';
+            }
         }
         
         this.draw();
@@ -137,15 +145,9 @@ var SillyHtmlGame = {
             this.context.fillStyle = 'rgba(240, 240, 240, 0.8)';
             this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);        
             this.context.fillStyle = '#707070';
-            this.context.fillText("Click to start", this.canvas.width / 2, this.canvas.height / 2);
-        }
-        
-        if (this.lives <= 0)
-        {
-            this.balls.splice(0, this.balls.length);
-            alert("You dead, foo'!");
-            this.init(this.canvas.id); // Hacky - need an init without canvas ID
-            this.paused = true;
+            var messageLines = this.message.split('\n');
+            for (var i = 0; i < messageLines.length; i ++)
+                this.context.fillText(messageLines[i], this.canvas.width / 2, this.canvas.height / 2 - (messageLines.length - 1) / 2 * 35 + i * 35);
         }
     },
     fire : function()
