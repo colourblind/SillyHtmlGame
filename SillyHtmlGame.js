@@ -10,7 +10,6 @@ var SillyHtmlGame = {
     score : 0,
     ballSpeed : 1,
     gapWidth : 1,
-    timersSet : false,
     paused : true,
     message : 'Click to start',
     init : function(canvasId)
@@ -26,18 +25,18 @@ var SillyHtmlGame = {
             return;
         }
         
-        this.score = 0;
-        this.lives = 5;
-
         this.canvas.onmousemove = function(event) { SillyHtmlGame.mousePosition.x = event.clientX - SillyHtmlGame.offsetPosition.x + document.documentElement.scrollLeft; SillyHtmlGame.mousePosition.y = event.clientY - SillyHtmlGame.offsetPosition.y + document.documentElement.scrollTop; }
         this.canvas.onmouseup = function(event) { SillyHtmlGame.paused = !SillyHtmlGame.paused; SillyHtmlGame.message = 'Click to continue'; }
         
-        if (!this.timersSet)
-        {
-            setInterval(function() { SillyHtmlGame.update(); }, 40);
-            setInterval(function() { SillyHtmlGame.fire(); }, 8000);
-            this.timersSet = true;
-        }
+        setInterval(function() { SillyHtmlGame.update(); }, 40);
+        setInterval(function() { SillyHtmlGame.fire(); }, 8000);
+        
+        this.reset();
+    },
+    reset : function()
+    {
+        this.score = 0;
+        this.lives = 5;
     },
     update : function()
     {
@@ -92,7 +91,7 @@ var SillyHtmlGame = {
             if (this.lives <= 0)
             {
                 this.balls.splice(0, this.balls.length);
-                this.init(this.canvas.id); // Hacky - need an init without canvas ID
+                this.reset();
                 this.paused = true;
                 this.message = 'You dead, foo\'!\nClick to try again';
             }
