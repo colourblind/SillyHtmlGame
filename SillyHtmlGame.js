@@ -4,6 +4,8 @@ var SillyHtmlGame = {
     balls : [],
     offsetPosition : { x : 0, y : 0 },
     mousePosition : { x : 0, y : 0 },
+    screenCentre : { x : 0, y : 0 },
+    maxDimension : 200,
     rotation : 0,
     radius : 50,
     lives : 0,
@@ -19,6 +21,9 @@ var SillyHtmlGame = {
         {
             this.context = this.canvas.getContext('2d');
             this.offsetPosition = getElementPosition(canvasId);
+            this.screenCentre = { x : this.canvas.width / 2, y : this.canvas.height / 2 }
+
+            this.maxDimension = Math.max(this.canvas.width, this.canvas.height);
         }
         else
         {
@@ -41,13 +46,11 @@ var SillyHtmlGame = {
     update : function()
     {
         if (!this.paused)
-        {
-            var screenCentre = { x : this.canvas.width / 2, y : this.canvas.height / 2 }
-            
-            this.rotation = normaliseAngle(Math.atan2(this.mousePosition.y - screenCentre.y, this.mousePosition.x - screenCentre.x));
-            this.radius = Math.sqrt(Math.pow(this.mousePosition.x - screenCentre.y, 2) + Math.pow(this.mousePosition.y - screenCentre.y, 2));
+        {            
+            this.rotation = normaliseAngle(Math.atan2(this.mousePosition.y - this.screenCentre.y, this.mousePosition.x - this.screenCentre.x));
+            this.radius = Math.sqrt(Math.pow(this.mousePosition.x - this.screenCentre.y, 2) + Math.pow(this.mousePosition.y - this.screenCentre.y, 2));
             this.radius = Math.max(Math.abs(this.radius), 20);
-            this.radius = Math.min(this.radius, 180);
+            this.radius = Math.min(this.radius, this.maxDimension / 2 - 20);
         
             // Update and draw balls
             for (var i = 0; i < this.balls.length; i ++)
@@ -57,7 +60,7 @@ var SillyHtmlGame = {
             for (var i = 0; i < this.balls.length; i ++)
             {
                 // If a ball reaches the edge delete it and increment the score
-                if (this.balls[i].distance > 200)
+                if (this.balls[i].distance > this.maxDimension / 2)
                 {
                     this.score ++;
                     this.balls.splice(i, 1); // remove from list
@@ -71,7 +74,7 @@ var SillyHtmlGame = {
                     && !(this.balls[i].direction > this.rotation - this.gapWidth
                     && this.balls[i].direction < this.rotation);
                 
-                var radius2 = 200 - this.radius;
+                var radius2 = this.maxDimension / 2 - this.radius;
                 var rotation2 = normaliseAngle(this.rotation - Math.PI);
                 var hitRingTwo = this.balls[i].distance >= radius2 - 8 - 5
                     && this.balls[i].distance <= radius2 + 7
@@ -101,15 +104,13 @@ var SillyHtmlGame = {
     },
     draw : function()
     {
-        var screenCentre = { x : this.canvas.width / 2, y : this.canvas.height / 2 }
-
         this.context.fillStyle = '#f0f0f0';
         this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);        
 
         for (var i = 0; i < this.balls.length; i ++)
         {
-            var x = Math.cos(this.balls[i].direction) * this.balls[i].distance + screenCentre.x;
-            var y = Math.sin(this.balls[i].direction) * this.balls[i].distance + screenCentre.y;            
+            var x = Math.cos(this.balls[i].direction) * this.balls[i].distance + this.screenCentre.x;
+            var y = Math.sin(this.balls[i].direction) * this.balls[i].distance + this.screenCentre.y;            
 
             this.context.fillStyle = this.balls[i].colour;
             this.context.beginPath();
@@ -123,12 +124,12 @@ var SillyHtmlGame = {
 
         this.context.strokeStyle = '#ff8000';
         this.context.beginPath();
-        this.context.arc(screenCentre.x, screenCentre.y, this.radius, this.rotation, this.rotation + (Math.PI * 2 - this.gapWidth), false);
+        this.context.arc(this.screenCentre.x, this.screenCentre.y, this.radius, this.rotation, this.rotation + (Math.PI * 2 - this.gapWidth), false);
         this.context.stroke();
         
         this.context.strokeStyle = '#707070';
         this.context.beginPath();
-        this.context.arc(screenCentre.x, screenCentre.y, 200 - this.radius, this.rotation - Math.PI, this.rotation - Math.PI + (Math.PI * 2 - this.gapWidth), false);
+        this.context.arc(this.screenCentre.x, this.screenCentre.y, this.maxDimension / 2 - this.radius, this.rotation - Math.PI, this.rotation - Math.PI + (Math.PI * 2 - this.gapWidth), false);
         this.context.stroke();
         
         // Draw UI
