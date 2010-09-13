@@ -3,17 +3,33 @@
 <head>
 
     <script type="text/javascript" src="SillyHtmlGame.js"></script>
+    <style text="text/css">
+    
+    td
+    {
+        padding-right: 8px;
+    }
+    
+    </style>
     
 </head>
 </body>
 
 <canvas id="stage" width="400" height="400" style="border: 1px solid #000;">
-<p>Looks like you're not using an up-to-date browser, you luddite.</p>
+<p>It looks like you're using a bad browser, you luddite. You can remedy the 
+situation with 
+<a href="http://www.mozilla.com/firefox/" target="_blank">Firefox</a>
+or <a href="http://www.google.com/chrome" target="_blank">Chrome</a> or 
+pretty much <a href="http://www.opera.com/" target="_blank">anything</a> that 
+isn't Internet Explorer.
 </canvas>
+
+<div id="testResults"></div>
 
 <script type="text/javascript">
 
 SillyHtmlGame.init('stage');
+SillyHtmlGame.collisionTest('testResults');
 
 </script>
 

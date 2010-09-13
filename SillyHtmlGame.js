@@ -68,21 +68,8 @@ var SillyHtmlGame = {
                     continue;
                 }
                 
-                // Check for collisions against the rings
-                var hitRingOne = this.balls[i].distance >= this.radius - 8 - 5
-                    && this.balls[i].distance <= this.radius + 7
-                    && !(this.balls[i].direction > this.rotation - this.gapWidth
-                    && this.balls[i].direction < this.rotation);
-                
-                var radius2 = this.maxDimension / 2 - this.radius;
-                var rotation2 = normaliseAngle(this.rotation - Math.PI);
-                var hitRingTwo = this.balls[i].distance >= radius2 - 8 - 5
-                    && this.balls[i].distance <= radius2 + 7
-                    && !(this.balls[i].direction > rotation2 - this.gapWidth
-                    && this.balls[i].direction < rotation2);
-
                 // And handle accordingly
-                if (hitRingOne || hitRingTwo)
+                if (this.collide(this.balls[i]))
                 {
                     this.lives --;
                     this.balls.splice(i, 1);    // remove the ball that was hit
@@ -124,12 +111,12 @@ var SillyHtmlGame = {
 
         this.context.strokeStyle = '#ff8000';
         this.context.beginPath();
-        this.context.arc(this.screenCentre.x, this.screenCentre.y, this.radius, this.rotation, this.rotation + (Math.PI * 2 - this.gapWidth), false);
+        this.context.arc(this.screenCentre.x, this.screenCentre.y, this.radius, this.rotation + this.gapWidth / 2, this.rotation + (Math.PI * 2 - this.gapWidth / 2), false);
         this.context.stroke();
         
         this.context.strokeStyle = '#707070';
         this.context.beginPath();
-        this.context.arc(this.screenCentre.x, this.screenCentre.y, this.maxDimension / 2 - this.radius, this.rotation - Math.PI, this.rotation - Math.PI + (Math.PI * 2 - this.gapWidth), false);
+        this.context.arc(this.screenCentre.x, this.screenCentre.y, this.maxDimension / 2 - this.radius, this.rotation + this.gapWidth / 2 - Math.PI, this.rotation - Math.PI + (Math.PI * 2 - this.gapWidth / 2), false);
         this.context.stroke();
         
         // Draw UI
@@ -160,6 +147,53 @@ var SillyHtmlGame = {
             ball.colour = '#000';
             this.balls.push(ball);
         }
+    },
+    collide : function(ball)
+    {
+        var hitRingOne = ball.distance >= this.radius - 8 - 5
+            && ball.distance <= this.radius + 7
+            && !(Math.abs(ball.direction - this.rotation) < this.gapWidth / 2
+            || Math.abs(ball.direction - this.rotation + Math.PI * 2) < this.gapWidth / 2
+            || Math.abs(ball.direction - this.rotation - Math.PI * 2) < this.gapWidth / 2);
+        
+        var radius2 = this.maxDimension / 2 - this.radius;
+        var rotation2 = normaliseAngle(this.rotation - Math.PI);
+        var hitRingTwo = ball.distance >= radius2 - 8 - 5
+            && ball.distance <= radius2 + 7
+            && (Math.abs(ball.direction - rotation2) > this.gapWidth / 2
+            || Math.abs(ball.direction - rotation2 + Math.PI * 2) < this.gapWidth / 2
+            || Math.abs(ball.direction - rotation2 - Math.PI * 2) < this.gapWidth / 2);
+            
+        return hitRingOne || hitRingTwo;
+    },
+    collisionTest : function(resultElementId)
+    {
+        var ball = new Object();
+        ball.distance = 150;
+        ball.direction = 0;
+    
+        this.radius = 150;
+        var data = '<table cellspacing="0"><tr>\n';
+        for (var i = 0; i < Math.PI * 2; i += Math.PI / 16)
+        {
+            data += '<td><table cellspacing="0">\n';
+            ball.direction = i;
+            for (var j = 0; j < Math.PI * 2; j += Math.PI / 16)
+            {
+                this.rotation = j;
+                var collide = this.collide(ball);
+                data += '  <tr style="background-color: ' + (collide ? '#ff8080' : '#80ff80') + ';">\n';
+                data += '  <td>' + this.rotation + '</td>\n';
+                data += '  <td>' + ball.direction + '</td>\n';
+                data += '  <td>' + collide + '</td>\n';
+                data += '  </tr>\n';
+            }
+            data += '</table></td>';
+        }
+        data += '</tr></table>\n';
+        
+        var resultTarget = document.getElementById(resultElementId);
+        resultTarget.innerHTML = data;
     }
 }
 
