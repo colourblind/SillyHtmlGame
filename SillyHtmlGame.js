@@ -13,6 +13,8 @@ var SillyHtmlGame = {
     ballSpeed : 1,
     gapWidth : 1,
     paused : true,
+    timeToNextSpawn : 3000,
+    spawnSpeed : 8000,
     message : 'Click to start',
     init : function(canvasId)
     {
@@ -34,7 +36,6 @@ var SillyHtmlGame = {
         this.canvas.onmouseup = function(event) { SillyHtmlGame.paused = !SillyHtmlGame.paused; SillyHtmlGame.message = 'Click to continue'; }
         
         setInterval(function() { SillyHtmlGame.update(); }, 40);
-        setInterval(function() { SillyHtmlGame.fire(); }, 8000);
         
         this.reset();
     },
@@ -46,7 +47,11 @@ var SillyHtmlGame = {
     update : function()
     {
         if (!this.paused)
-        {            
+        {
+            this.timeToNextSpawn -= 40;
+            if (this.timeToNextSpawn < 0)
+                this.fire();
+        
             this.rotation = normaliseAngle(Math.atan2(this.mousePosition.y - this.screenCentre.y, this.mousePosition.x - this.screenCentre.x));
             this.radius = Math.sqrt(Math.pow(this.mousePosition.x - this.screenCentre.y, 2) + Math.pow(this.mousePosition.y - this.screenCentre.y, 2));
             this.radius = Math.max(Math.abs(this.radius), 20);
@@ -68,7 +73,7 @@ var SillyHtmlGame = {
                     continue;
                 }
                 
-                // And handle accordingly
+                // Check for collisions with the rings and handle accordingly
                 if (this.collide(this.balls[i]))
                 {
                     this.lives --;
@@ -139,14 +144,12 @@ var SillyHtmlGame = {
     },
     fire : function()
     {
-        if (!this.paused)
-        {
-            var ball = new Object();
-            ball.distance = 0;
-            ball.direction = Math.random() * Math.PI * 2;
-            ball.colour = '#000';
-            this.balls.push(ball);
-        }
+        var ball = new Object();
+        ball.distance = 0;
+        ball.direction = Math.random() * Math.PI * 2;
+        ball.colour = '#000';
+        this.balls.push(ball);
+        this.timeToNextSpawn = this.spawnSpeed;
     },
     collide : function(ball)
     {
