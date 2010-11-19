@@ -70,6 +70,8 @@ var SillyHtmlGame = {
                     this.score ++;
                     this.balls.splice(i, 1); // remove from list
                     i --;
+                    if (this.spawnSpeed > 1000) // speed up spawns
+                        this.spawnSpeed -= 300;
                     continue;
                 }
                 
