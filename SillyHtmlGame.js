@@ -8,9 +8,7 @@ var SillyHtmlGame = {
     maxDimension : 200,
     rotation : 0,
     radius : 50,
-    lives : 0,
     score : 0,
-    high_score : 0,
     ballSpeed : 1,
     gapWidth : 1,
     paused : true,
@@ -44,10 +42,6 @@ var SillyHtmlGame = {
     {
 		this.spawnSpeed = 8000;
         this.score = 0;
-        this.lives = 5;
-	this.ballSpeed = 1;
-	this.timeToNextSpawn = 3000;
-	this.spawnSpeed = 8000;
     },
     update : function()
     {
@@ -74,31 +68,23 @@ var SillyHtmlGame = {
                 if (this.balls[i].distance > this.maxDimension / 2)
                 {
                     this.score ++;
-		    if (this.score > this.high_score)
-		      {this.high_score++;}
                     this.balls.splice(i, 1); // remove from list
                     i --;
                     if (this.spawnSpeed > 1000) // speed up spawns
-                        this.spawnSpeed -= 300;
+                        this.spawnSpeed -= 150;
                     continue;
                 }
                 
                 // Check for collisions with the rings and handle accordingly
+				// Reset score, clear balls, pause game and notify user.
                 if (this.collide(this.balls[i]))
                 {
-                    this.lives --;
-                    this.balls.splice(i, 1);    // remove the ball that was hit
-                    i --;                       // and tweak the iterator    
-                    continue;
+					this.balls.splice(0, this.balls.length);
+					this.reset();
+					this.paused = true;
+					this.message = 'You\'ve perished!\nClick to try again';
+					break;
                 }
-            }
-            
-            if (this.lives <= 0)
-            {
-                this.balls.splice(0, this.balls.length);
-                this.reset();
-                this.paused = true;
-                this.message = 'You dead, foo\'!\nClick to try again';
             }
         }
         
@@ -138,9 +124,7 @@ var SillyHtmlGame = {
         this.context.fillStyle = '#707070';
         this.context.textAlign = 'center';
         this.context.font = '30px Arial bold';
-        this.context.fillText(this.lives.toString(), 30, this.canvas.height - 20);
         this.context.fillText(this.score.toString(), this.canvas.width - 30, this.canvas.height - 20);
-	this.context.fillText(this.high_score.toString(), this.canvas.width - 30, this.canvas.height - 360);
         
         // Prompt
         if (this.paused)
